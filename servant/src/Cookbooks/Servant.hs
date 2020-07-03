@@ -7,51 +7,105 @@ module Cookbooks.Servant
   )
 where
 
-import Data.Aeson (ToJSON)
+import Data.Aeson (FromJSON, ToJSON)
+import Data.List (intercalate)
 import Data.Proxy (Proxy (Proxy))
-import Data.Time (Day, fromGregorian)
 import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
-import Servant ((:<|>) ((:<|>)), (:>), Application, Get, JSON, Server, serve)
+import Servant
+  ( (:<|>) ((:<|>)),
+    (:>),
+    Application,
+    Capture,
+    Get,
+    Handler,
+    JSON,
+    Post,
+    QueryParam,
+    ReqBody,
+    Server,
+    serve,
+  )
 
-data User
-  = User
-      { name :: String,
-        age :: Int,
-        email :: String,
-        registration_date :: Day
+type API =
+  "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
+    :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
+    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
+
+data Position
+  = Position
+      { xCoord :: Int,
+        yCoord :: Int
       }
   deriving (Generic)
 
-instance ToJSON User
+instance ToJSON Position
 
-type UserAPI2 =
-  "users" :> Get '[JSON] [User]
-    :<|> "albert" :> Get '[JSON] User
-    :<|> "isaac" :> Get '[JSON] User
+newtype HelloMessage = HelloMessage {msg :: String}
+  deriving (Generic)
 
-isaac :: User
-isaac = User "Isaac Newton" 372 "isaac@newton.co.uk" (fromGregorian 1683 3 1)
+instance ToJSON HelloMessage
 
-albert :: User
-albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
+data ClientInfo
+  = ClientInfo
+      { clientName :: String,
+        clientEmail :: String,
+        clientAge :: Int,
+        clientInterestedIn :: [String]
+      }
+  deriving (Generic)
 
-users2 :: [User]
-users2 = [isaac, albert]
+instance FromJSON ClientInfo
 
-server2 :: Server UserAPI2
-server2 =
-  pure users2
-    :<|> pure albert
-    :<|> pure isaac
+instance ToJSON ClientInfo
 
-userAPI :: Proxy UserAPI2
+data Email
+  = Email
+      { from :: String,
+        to :: String,
+        subject :: String,
+        body :: String
+      }
+  deriving (Generic)
+
+instance ToJSON Email
+
+emailForClient :: ClientInfo -> Email
+emailForClient c = Email from' to' subject' body'
+  where
+    from' = "great@company.com"
+    to' = clientEmail c
+    subject' = "Hey " ++ clientName c ++ ", we miss you!"
+    body' =
+      "Hi " ++ clientName c ++ ",\n\n"
+        ++ "Since you've recently turned "
+        ++ show (clientAge c)
+        ++ ", have you checked out our latest "
+        ++ intercalate ", " (clientInterestedIn c)
+        ++ " products? Give us a visit!"
+
+server3 :: Server API
+server3 =
+  position
+    :<|> hello
+    :<|> marketing
+  where
+    position :: Int -> Int -> Handler Position
+    position x y = pure (Position x y)
+    hello :: Maybe String -> Handler HelloMessage
+    hello mname = pure . HelloMessage $ case mname of
+      Nothing -> "Hello, anonymous"
+      Just n -> "Hello, " ++ n
+    marketing :: ClientInfo -> Handler Email
+    marketing clientInfo = pure (emailForClient clientInfo)
+
+userAPI :: Proxy API
 userAPI = Proxy
 
-app2 :: Application
-app2 = serve userAPI server2
+app3 :: Application
+app3 = serve userAPI server3
 
 runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
-  run 8081 app2
+  run 8081 app3
