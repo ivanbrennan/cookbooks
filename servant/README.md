@@ -7,14 +7,15 @@ Provision a development environment with [Nix](https://nixos.org/):
 nix-shell
 ```
 
-## Build
+## Make
 
 ```sh
-ghcid --command='cabal v2-repl' --no-height-limit --reverse-errors --clear --lint
-```
+# build
+make
 
-## Run
+# watch
+make watch
 
-```sh
-cabal v2-run
+# run
+make run
 ```
