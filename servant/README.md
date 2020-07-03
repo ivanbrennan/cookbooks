@@ -16,6 +16,9 @@ make
 # watch
 make watch
 
+# format
+make format
+
 # run
 make run
 ```
