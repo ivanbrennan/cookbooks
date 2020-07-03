@@ -1,8 +1,6 @@
 module Main where
 
-import qualified Cookbooks.Servant (someFunc)
+import Cookbooks.Servant (someFunc)
 
 main :: IO ()
-main = do
-  putStrLn "Hello, Haskell!"
-  Cookbooks.Servant.someFunc
+main = someFunc
