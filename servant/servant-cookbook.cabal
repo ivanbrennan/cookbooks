@@ -1,7 +1,7 @@
 cabal-version:      >=1.10
 name:               servant-cookbook
 version:            0.1.0.0
-license-file:       LICENSE
+license:            BSD3
 maintainer:         ivan.brennan@gmail.com
 author:             ivanbrennan
 build-type:         Simple
