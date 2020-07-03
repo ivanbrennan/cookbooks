@@ -1,0 +1,24 @@
+cabal-version:      >=1.10
+name:               servant-cookbook
+version:            0.1.0.0
+license:            BSD3
+maintainer:         ivan.brennan@gmail.com
+author:             ivanbrennan
+build-type:         Simple
+extra-source-files:
+    CHANGELOG.md
+    README.md
+
+library
+    exposed-modules:  Cookbooks.Servant
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    build-depends:    base >=4.13 && <4.14
+
+executable servant-cookbook
+    main-is:          Main.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
