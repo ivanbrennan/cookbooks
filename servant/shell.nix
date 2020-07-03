@@ -13,6 +13,7 @@ in
       ghc
       haskellPackages.ghcid
       hlint
+      ormolu
       zlib
     ];
     shellHook = ''
