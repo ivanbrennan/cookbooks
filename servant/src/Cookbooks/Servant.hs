@@ -9,54 +9,34 @@ module Cookbooks.Servant
   )
 where
 
+import Control.Monad.IO.Class (liftIO)
 import Data.Aeson (ToJSON)
 import Data.Proxy (Proxy (Proxy))
 import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant ((:>), Application, Get, JSON, Server, serve)
-import Servant.HTML.Blaze (HTML)
-import Text.Blaze.Html5 (ToMarkup, table, td, th, toMarkup, tr)
 
-type PersonAPI = "persons" :> Get '[JSON, HTML] [Person]
+type IOAPI1 = "myfile.txt" :> Get '[JSON] FileContent
 
-data Person
-  = Person
-      { firstName :: String,
-        lastName :: String
-      }
+newtype FileContent
+  = FileContent
+      {content :: String}
   deriving (Generic)
 
-instance ToJSON Person
+instance ToJSON FileContent
 
-instance ToMarkup Person where
-  toMarkup person =
-    tr $ do
-      td (toMarkup $ firstName person)
-      td (toMarkup $ lastName person)
+server5 :: Server IOAPI1
+server5 = do
+  filecontent <- liftIO (readFile "myfile.txt")
+  pure (FileContent filecontent)
 
-instance ToMarkup [Person] where
-  toMarkup persons = table $ do
-    tr $ do
-      th "first name"
-      th "last name"
-    foldMap toMarkup persons
+ioAPI :: Proxy IOAPI1
+ioAPI = Proxy
 
-people :: [Person]
-people =
-  [ Person "Isaac" "Newton",
-    Person "Albert" "Einstein"
-  ]
-
-server4 :: Server PersonAPI
-server4 = pure people
-
-personAPI :: Proxy PersonAPI
-personAPI = Proxy
-
-app4 :: Application
-app4 = serve personAPI server4
+app5 :: Application
+app5 = serve ioAPI server5
 
 runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
-  run 8081 app4
+  run 8081 app5
