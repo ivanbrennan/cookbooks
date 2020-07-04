@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -7,45 +8,51 @@ module Cookbooks.Servant
   )
 where
 
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Proxy (Proxy (Proxy))
+import Data.Time (Day, fromGregorian)
+import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant
-  ( (:<|>) ((:<|>)),
-    (:>),
+  ( (:>),
     Application,
-    Get,
-    Handler,
     JSON,
-    ReqBody,
-    Server,
-    ServerT,
-    hoistServer,
+    NewlineFraming,
+    SourceIO,
+    StreamGet,
     serve,
   )
+import Servant.Types.SourceT (source)
 
-funToHandler :: (String -> a) -> Handler a
-funToHandler f = pure (f "hi")
+data User
+  = User
+      { name :: String,
+        age :: Int,
+        email :: String,
+        registration_date :: Day
+      }
+  deriving (Generic)
 
-type ReaderAPI =
-  "a" :> Get '[JSON] Int
-    :<|> "b" :> ReqBody '[JSON] Double :> Get '[JSON] Bool
+instance FromJSON User
 
-readerAPI :: Proxy ReaderAPI
-readerAPI = Proxy
+instance ToJSON User
 
-funServerT :: ServerT ReaderAPI ((->) String)
-funServerT = a :<|> b
-  where
-    a :: String -> Int
-    a _ = 1797
-    b :: Double -> String -> Bool
-    b _ s = s == "hi"
+isaac :: User
+isaac = User "Isaac Newton" 372 "isaac@newton.co.uk" (fromGregorian 1683 3 1)
 
-funServer :: Server ReaderAPI
-funServer = hoistServer readerAPI funToHandler funServerT
+albert :: User
+albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
+
+type StreamAPI = "userStream" :> StreamGet NewlineFraming JSON (SourceIO User)
+
+streamAPI :: Proxy StreamAPI
+streamAPI = Proxy
+
+streamUsers :: SourceIO User
+streamUsers = source [isaac, albert, albert]
 
 app :: Application
-app = serve readerAPI funServer
+app = serve streamAPI (pure streamUsers)
 
 runServer :: IO ()
 runServer = do
