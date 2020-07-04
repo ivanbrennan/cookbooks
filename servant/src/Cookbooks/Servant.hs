@@ -8,7 +8,7 @@ module Cookbooks.Servant
   )
 where
 
-import Data.Aeson (ToJSON)
+import Data.Aeson (FromJSON, ToJSON)
 import Data.Proxy (Proxy (Proxy))
 import Data.Time (Day)
 import GHC.Generics (Generic)
@@ -17,10 +17,12 @@ import Servant
   ( (:<|>) ((:<|>)),
     (:>),
     Application,
-    Capture,
     Get,
     Handler,
     JSON,
+    NoContent (NoContent),
+    PostNoContent,
+    ReqBody,
     Server,
     serve,
   )
@@ -34,23 +36,25 @@ data User
       }
   deriving (Generic)
 
+instance FromJSON User
+
 instance ToJSON User
 
-type API1 =
-  "users"
-    :> ( Get '[JSON] [User]
-           :<|> Capture "userid" Int :> Get '[JSON] User
+type API2 =
+  ReqBody '[JSON] User
+    :> ( Get '[JSON] User
+           :<|> PostNoContent
        )
 
-server9 :: Server API1
-server9 = getUsers :<|> getUser
+server9 :: Server API2
+server9 user = getUser :<|> registerUser
   where
-    getUsers :: Handler [User]
-    getUsers = error "..."
-    getUser :: Int -> Handler User
-    getUser _userid = error "..."
+    getUser :: Handler User
+    getUser = pure user
+    registerUser :: Handler NoContent
+    registerUser = pure NoContent
 
-staticAPI :: Proxy API1
+staticAPI :: Proxy API2
 staticAPI = Proxy
 
 app9 :: Application
