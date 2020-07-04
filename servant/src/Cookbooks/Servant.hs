@@ -39,16 +39,16 @@ instance ToJSON User
 albert :: User
 albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
 
-type MyHandler = Get '[JSON] (Headers '[Header "X-An-Int" Int] User)
+type MyHeadfulHandler = Get '[JSON] (Headers '[Header "X-A-Bool" Bool, Header "X-An-Int" Int] User)
 
-myHandler :: Server MyHandler
-myHandler = pure (addHeader 1797 albert)
+myHeadfulHandler :: Server MyHeadfulHandler
+myHeadfulHandler = pure $ addHeader True (addHeader 1797 albert)
 
-headerAPI :: Proxy MyHandler
+headerAPI :: Proxy MyHeadfulHandler
 headerAPI = Proxy
 
 app7 :: Application
-app7 = serve headerAPI myHandler
+app7 = serve headerAPI myHeadfulHandler
 
 runServer :: IO ()
 runServer = do
