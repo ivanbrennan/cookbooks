@@ -7,7 +7,6 @@ module Cookbooks.Servant
   )
 where
 
-import Control.Monad.Trans.Reader (Reader, asks, runReader)
 import Data.Proxy (Proxy (Proxy))
 import Network.Wai.Handler.Warp (run)
 import Servant
@@ -24,8 +23,8 @@ import Servant
     serve,
   )
 
-readerToHandler :: Reader String a -> Handler a
-readerToHandler r = pure (runReader r "hi")
+funToHandler :: (String -> a) -> Handler a
+funToHandler f = pure (f "hi")
 
 type ReaderAPI =
   "a" :> Get '[JSON] Int
@@ -34,19 +33,19 @@ type ReaderAPI =
 readerAPI :: Proxy ReaderAPI
 readerAPI = Proxy
 
-readerServerT :: ServerT ReaderAPI (Reader String)
-readerServerT = a :<|> b
+funServerT :: ServerT ReaderAPI ((->) String)
+funServerT = a :<|> b
   where
-    a :: Reader String Int
-    a = pure 1797
-    b :: Double -> Reader String Bool
-    b _ = asks (== "hi")
+    a :: String -> Int
+    a _ = 1797
+    b :: Double -> String -> Bool
+    b _ s = s == "hi"
 
-readerServer :: Server ReaderAPI
-readerServer = hoistServer readerAPI readerToHandler readerServerT
+funServer :: Server ReaderAPI
+funServer = hoistServer readerAPI funToHandler funServerT
 
 app :: Application
-app = serve readerAPI readerServer
+app = serve readerAPI funServer
 
 runServer :: IO ()
 runServer = do
