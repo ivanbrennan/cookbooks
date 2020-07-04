@@ -18,11 +18,9 @@ import Servant
     (:>),
     Application,
     Capture,
-    DeleteNoContent,
     Get,
     Handler,
     JSON,
-    NoContent,
     Server,
     serve,
   )
@@ -38,21 +36,21 @@ data User
 
 instance ToJSON User
 
-type UserAPI4 =
-  Capture "userid" Int
-    :> ( Get '[JSON] User
-           :<|> DeleteNoContent
+type API1 =
+  "users"
+    :> ( Get '[JSON] [User]
+           :<|> Capture "userid" Int :> Get '[JSON] User
        )
 
-server9 :: Server UserAPI4
-server9 userid = getUser userid :<|> deleteUser userid
+server9 :: Server API1
+server9 = getUsers :<|> getUser
   where
+    getUsers :: Handler [User]
+    getUsers = error "..."
     getUser :: Int -> Handler User
-    getUser = error "..."
-    deleteUser :: Int -> Handler NoContent
-    deleteUser = error "..."
+    getUser _userid = error "..."
 
-staticAPI :: Proxy UserAPI4
+staticAPI :: Proxy API1
 staticAPI = Proxy
 
 app9 :: Application
