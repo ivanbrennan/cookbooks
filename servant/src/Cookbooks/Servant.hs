@@ -19,6 +19,7 @@ import Servant
     Application,
     Capture,
     DeleteNoContent,
+    EmptyAPI,
     Get,
     Handler,
     JSON,
@@ -27,6 +28,7 @@ import Servant
     PutNoContent,
     ReqBody,
     Server,
+    emptyServer,
     serve,
   )
 
@@ -107,9 +109,10 @@ productsServer =
 type CombinedAPI =
   "users" :> UsersAPI
     :<|> "products" :> ProductsAPI
+    :<|> "empty" :> EmptyAPI
 
 server10 :: Server CombinedAPI
-server10 = usersServer :<|> productsServer
+server10 = usersServer :<|> productsServer :<|> emptyServer
 
 combinedAPI :: Proxy CombinedAPI
 combinedAPI = Proxy
