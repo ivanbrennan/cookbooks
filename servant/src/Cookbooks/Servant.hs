@@ -59,6 +59,12 @@ usersServer = getUsers :<|> newUser :<|> userOperations
     getUsers = error "..."
     newUser :: User -> Handler NoContent
     newUser _user = pure NoContent
+    userOperations ::
+      Int ->
+      ( Handler User
+          :<|> (User -> Handler NoContent)
+          :<|> Handler NoContent
+      )
     userOperations userid =
       viewUser userid :<|> updateUser userid :<|> deleteUser userid
       where
@@ -69,13 +75,58 @@ usersServer = getUsers :<|> newUser :<|> userOperations
         deleteUser :: Int -> Handler NoContent
         deleteUser _userid = pure NoContent
 
-usersAPI :: Proxy UsersAPI
-usersAPI = Proxy
+newtype Product = Product {productId :: Int} deriving (Generic)
 
-app9 :: Application
-app9 = serve usersAPI usersServer
+instance ToJSON Product
+
+instance FromJSON Product
+
+type ProductsAPI =
+  Get '[JSON] [Product]
+    :<|> ReqBody '[JSON] Product :> PostNoContent
+    :<|> Capture "productid" Int
+      :> ( Get '[JSON] Product
+             :<|> ReqBody '[JSON] Product :> PutNoContent
+             :<|> DeleteNoContent
+         )
+
+productsServer :: Server ProductsAPI
+productsServer = getProducts :<|> newProduct :<|> productOperations
+  where
+    getProducts :: Handler [Product]
+    getProducts = pure []
+    newProduct :: Product -> Handler NoContent
+    newProduct _product = pure NoContent
+    productOperations ::
+      Int ->
+      ( Handler Product
+          :<|> (Product -> Handler NoContent)
+          :<|> Handler NoContent
+      )
+    productOperations productid =
+      viewProduct productid :<|> updateProduct productid :<|> deleteProduct productid
+      where
+        viewProduct :: Int -> Handler Product
+        viewProduct _productid = error "..."
+        updateProduct :: Int -> Product -> Handler NoContent
+        updateProduct _productid _product = pure NoContent
+        deleteProduct :: Int -> Handler NoContent
+        deleteProduct _productid = pure NoContent
+
+type CombinedAPI =
+  "users" :> UsersAPI
+    :<|> "products" :> ProductsAPI
+
+server10 :: Server CombinedAPI
+server10 = usersServer :<|> productsServer
+
+combinedAPI :: Proxy CombinedAPI
+combinedAPI = Proxy
+
+app10 :: Application
+app10 = serve combinedAPI server10
 
 runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
-  run 8081 app9
+  run 8081 app10
