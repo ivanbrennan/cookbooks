@@ -38,25 +38,27 @@ data User
 
 instance ToJSON User
 
-type UserAPI3 =
-  Capture "userid" Int :> Get '[JSON] User
-    :<|> Capture "userid" Int :> DeleteNoContent
+type UserAPI4 =
+  Capture "userid" Int
+    :> ( Get '[JSON] User
+           :<|> DeleteNoContent
+       )
 
-server8 :: Server UserAPI3
-server8 = getUser :<|> deleteUser
+server9 :: Server UserAPI4
+server9 userid = getUser userid :<|> deleteUser userid
   where
     getUser :: Int -> Handler User
-    getUser _userid = error "..."
+    getUser = error "..."
     deleteUser :: Int -> Handler NoContent
-    deleteUser _userid = error "..."
+    deleteUser = error "..."
 
-staticAPI :: Proxy UserAPI3
+staticAPI :: Proxy UserAPI4
 staticAPI = Proxy
 
-app8 :: Application
-app8 = serve staticAPI server8
+app9 :: Application
+app9 = serve staticAPI server9
 
 runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
-  run 8081 app8
+  run 8081 app9
