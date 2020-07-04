@@ -1,5 +1,7 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Cookbooks.Servant
@@ -7,105 +9,58 @@ module Cookbooks.Servant
   )
 where
 
-import Data.Aeson (FromJSON, ToJSON)
-import Data.List (intercalate)
+import Data.Aeson (ToJSON)
 import Data.Proxy (Proxy (Proxy))
 import GHC.Generics (Generic)
+import Lucid (ToHtml, table_, td_, th_, toHtml, toHtmlRaw, tr_)
 import Network.Wai.Handler.Warp (run)
-import Servant
-  ( (:<|>) ((:<|>)),
-    (:>),
-    Application,
-    Capture,
-    Get,
-    Handler,
-    JSON,
-    Post,
-    QueryParam,
-    ReqBody,
-    Server,
-    serve,
-  )
+import Servant ((:>), Application, Get, JSON, Server, serve)
+import Servant.HTML.Lucid (HTML)
 
-type API =
-  "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
-    :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
-    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
+type PersonAPI = "persons" :> Get '[JSON, HTML] [Person]
 
-data Position
-  = Position
-      { xCoord :: Int,
-        yCoord :: Int
+data Person
+  = Person
+      { firstName :: String,
+        lastName :: String
       }
   deriving (Generic)
 
-instance ToJSON Position
+instance ToJSON Person
 
-newtype HelloMessage = HelloMessage {msg :: String}
-  deriving (Generic)
+instance ToHtml Person where
+  toHtml person =
+    tr_ $ do
+      td_ (toHtml $ firstName person)
+      td_ (toHtml $ lastName person)
 
-instance ToJSON HelloMessage
+  toHtmlRaw = toHtml
 
-data ClientInfo
-  = ClientInfo
-      { clientName :: String,
-        clientEmail :: String,
-        clientAge :: Int,
-        clientInterestedIn :: [String]
-      }
-  deriving (Generic)
+instance ToHtml [Person] where
+  toHtml persons = table_ $ do
+    tr_ $ do
+      th_ "first name"
+      th_ "last name"
+    foldMap toHtml persons
 
-instance FromJSON ClientInfo
+  toHtmlRaw = toHtml
 
-instance ToJSON ClientInfo
+people :: [Person]
+people =
+  [ Person "Isaac" "Newton",
+    Person "Albert" "Einstein"
+  ]
 
-data Email
-  = Email
-      { from :: String,
-        to :: String,
-        subject :: String,
-        body :: String
-      }
-  deriving (Generic)
+server4 :: Server PersonAPI
+server4 = pure people
 
-instance ToJSON Email
+personAPI :: Proxy PersonAPI
+personAPI = Proxy
 
-emailForClient :: ClientInfo -> Email
-emailForClient c = Email from' to' subject' body'
-  where
-    from' = "great@company.com"
-    to' = clientEmail c
-    subject' = "Hey " ++ clientName c ++ ", we miss you!"
-    body' =
-      "Hi " ++ clientName c ++ ",\n\n"
-        ++ "Since you've recently turned "
-        ++ show (clientAge c)
-        ++ ", have you checked out our latest "
-        ++ intercalate ", " (clientInterestedIn c)
-        ++ " products? Give us a visit!"
-
-server3 :: Server API
-server3 =
-  position
-    :<|> hello
-    :<|> marketing
-  where
-    position :: Int -> Int -> Handler Position
-    position x y = pure (Position x y)
-    hello :: Maybe String -> Handler HelloMessage
-    hello mname = pure . HelloMessage $ case mname of
-      Nothing -> "Hello, anonymous"
-      Just n -> "Hello, " ++ n
-    marketing :: ClientInfo -> Handler Email
-    marketing clientInfo = pure (emailForClient clientInfo)
-
-userAPI :: Proxy API
-userAPI = Proxy
-
-app3 :: Application
-app3 = serve userAPI server3
+app4 :: Application
+app4 = serve personAPI server4
 
 runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
-  run 8081 app3
+  run 8081 app4
