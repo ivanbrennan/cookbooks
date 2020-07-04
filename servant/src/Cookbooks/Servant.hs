@@ -15,13 +15,16 @@ import Data.Time (Day, fromGregorian)
 import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant
-  ( Application,
+  ( (:>),
+    Application,
+    Capture,
     Get,
     Header,
     Headers,
     JSON,
     Server,
     addHeader,
+    noHeader,
     serve,
   )
 
@@ -39,16 +42,21 @@ instance ToJSON User
 albert :: User
 albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
 
-type MyHeadfulHandler = Get '[JSON] (Headers '[Header "X-A-Bool" Bool, Header "X-An-Int" Int] User)
+type MyMaybeHeaderHandler =
+  Capture "withHeader" Bool :> Get '[JSON] (Headers '[Header "X-An-Int" Int] User)
 
-myHeadfulHandler :: Server MyHeadfulHandler
-myHeadfulHandler = pure $ addHeader True (addHeader 1797 albert)
+myMaybeHeaderHandler :: Server MyMaybeHeaderHandler
+myMaybeHeaderHandler x =
+  pure $
+    if x
+      then addHeader 1797 albert
+      else noHeader albert
 
-headerAPI :: Proxy MyHeadfulHandler
+headerAPI :: Proxy MyMaybeHeaderHandler
 headerAPI = Proxy
 
 app7 :: Application
-app7 = serve headerAPI myHeadfulHandler
+app7 = serve headerAPI myMaybeHeaderHandler
 
 runServer :: IO ()
 runServer = do
