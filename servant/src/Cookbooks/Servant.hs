@@ -43,75 +43,66 @@ instance FromJSON User
 
 instance ToJSON User
 
-type UsersAPI =
-  Get '[JSON] [User]
-    :<|> ReqBody '[JSON] User :> PostNoContent
-    :<|> Capture "userid" Int
-      :> ( Get '[JSON] User
-             :<|> ReqBody '[JSON] User :> PutNoContent
-             :<|> DeleteNoContent
-         )
-
-usersServer :: Server UsersAPI
-usersServer = getUsers :<|> newUser :<|> userOperations
-  where
-    getUsers :: Handler [User]
-    getUsers = error "..."
-    newUser :: User -> Handler NoContent
-    newUser _user = pure NoContent
-    userOperations ::
-      Int ->
-      ( Handler User
-          :<|> (User -> Handler NoContent)
-          :<|> Handler NoContent
-      )
-    userOperations userid =
-      viewUser userid :<|> updateUser userid :<|> deleteUser userid
-      where
-        viewUser :: Int -> Handler User
-        viewUser = error "..."
-        updateUser :: Int -> User -> Handler NoContent
-        updateUser _userid _user = pure NoContent
-        deleteUser :: Int -> Handler NoContent
-        deleteUser _userid = pure NoContent
-
 newtype Product = Product {productId :: Int} deriving (Generic)
 
 instance ToJSON Product
 
 instance FromJSON Product
 
-type ProductsAPI =
-  Get '[JSON] [Product]
-    :<|> ReqBody '[JSON] Product :> PostNoContent
-    :<|> Capture "productid" Int
-      :> ( Get '[JSON] Product
-             :<|> ReqBody '[JSON] Product :> PutNoContent
+type APIFor a i =
+  Get '[JSON] [a]
+    :<|> ReqBody '[JSON] a :> PostNoContent
+    :<|> Capture "id" i
+      :> ( Get '[JSON] a
+             :<|> ReqBody '[JSON] a :> PutNoContent
              :<|> DeleteNoContent
          )
 
+serverFor ::
+  Handler [a] ->
+  (a -> Handler NoContent) ->
+  (i -> Handler a) ->
+  (i -> a -> Handler NoContent) ->
+  (i -> Handler NoContent) ->
+  Server (APIFor a i)
+serverFor list create view update delete =
+  list :<|> create :<|> operations
+  where
+    operations i = view i :<|> update i :<|> delete i
+
+type UsersAPI = APIFor User Int
+
+usersServer :: Server UsersAPI
+usersServer =
+  serverFor getUsers newUser viewUser updateUser deleteUser
+  where
+    getUsers :: Handler [User]
+    getUsers = error "..."
+    newUser :: User -> Handler NoContent
+    newUser _user = pure NoContent
+    viewUser :: Int -> Handler User
+    viewUser = error "..."
+    updateUser :: Int -> User -> Handler NoContent
+    updateUser _userid _user = pure NoContent
+    deleteUser :: Int -> Handler NoContent
+    deleteUser _userid = pure NoContent
+
+type ProductsAPI = APIFor Product Int
+
 productsServer :: Server ProductsAPI
-productsServer = getProducts :<|> newProduct :<|> productOperations
+productsServer =
+  serverFor getProducts newProduct viewProduct updateProduct deleteProduct
   where
     getProducts :: Handler [Product]
     getProducts = pure []
     newProduct :: Product -> Handler NoContent
     newProduct _product = pure NoContent
-    productOperations ::
-      Int ->
-      ( Handler Product
-          :<|> (Product -> Handler NoContent)
-          :<|> Handler NoContent
-      )
-    productOperations productid =
-      viewProduct productid :<|> updateProduct productid :<|> deleteProduct productid
-      where
-        viewProduct :: Int -> Handler Product
-        viewProduct _productid = error "..."
-        updateProduct :: Int -> Product -> Handler NoContent
-        updateProduct _productid _product = pure NoContent
-        deleteProduct :: Int -> Handler NoContent
-        deleteProduct _productid = pure NoContent
+    viewProduct :: Int -> Handler Product
+    viewProduct _productid = error "..."
+    updateProduct :: Int -> Product -> Handler NoContent
+    updateProduct _productid _product = pure NoContent
+    deleteProduct :: Int -> Handler NoContent
+    deleteProduct _productid = pure NoContent
 
 type CombinedAPI =
   "users" :> UsersAPI
