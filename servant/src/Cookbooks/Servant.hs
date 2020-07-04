@@ -1,6 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
@@ -9,54 +7,27 @@ module Cookbooks.Servant
   )
 where
 
-import Data.Aeson (ToJSON)
 import Data.Proxy (Proxy (Proxy))
-import Data.Time (Day, fromGregorian)
-import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant
   ( (:>),
     Application,
-    Capture,
-    Get,
-    Header,
-    Headers,
-    JSON,
+    Raw,
     Server,
-    addHeader,
-    noHeader,
     serve,
+    serveDirectoryWebApp,
   )
 
-data User
-  = User
-      { name :: String,
-        age :: Int,
-        email :: String,
-        registration_date :: Day
-      }
-  deriving (Generic)
+type StaticAPI = "static" :> Raw
 
-instance ToJSON User
+server7 :: Server StaticAPI
+server7 = serveDirectoryWebApp "static-files"
 
-albert :: User
-albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
-
-type MyMaybeHeaderHandler =
-  Capture "withHeader" Bool :> Get '[JSON] (Headers '[Header "X-An-Int" Int] User)
-
-myMaybeHeaderHandler :: Server MyMaybeHeaderHandler
-myMaybeHeaderHandler x =
-  pure $
-    if x
-      then addHeader 1797 albert
-      else noHeader albert
-
-headerAPI :: Proxy MyMaybeHeaderHandler
-headerAPI = Proxy
+staticAPI :: Proxy StaticAPI
+staticAPI = Proxy
 
 app7 :: Application
-app7 = serve headerAPI myMaybeHeaderHandler
+app7 = serve staticAPI server7
 
 runServer :: IO ()
 runServer = do
