@@ -27,6 +27,14 @@ run-server:
 run-client:
 	cabal v2-run servant-client-cookbook
 
+.PHONY: run-int-server
+run-int-server:
+	cabal v2-run servant-int-server-cookbook
+
+.PHONY: run-hoisted-client
+run-hoisted-client:
+	cabal v2-run servant-hoisted-client-cookbook
+
 .PHONY: clean
 clean:
 	rm -rf $(PROJECT_ROOT)/dist

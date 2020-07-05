@@ -3,17 +3,29 @@
 
 module Cookbooks.Servant.Client
   ( runClient,
+    runHoistedClient,
   )
 where
 
-import Cookbooks.Servant.Server (ClientInfo (ClientInfo), Email, HelloMessage, Position, api)
+import Cookbooks.Servant.Server
+  ( ClientInfo (ClientInfo),
+    Email,
+    HelloMessage,
+    IntAPI,
+    Position,
+    api,
+    intAPI,
+  )
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import Servant ((:<|>) ((:<|>)))
 import Servant.Client
   ( BaseUrl (BaseUrl),
+    Client,
+    ClientEnv,
     ClientM,
     Scheme (Http),
     client,
+    hoistClient,
     mkClientEnv,
     runClientM,
   )
@@ -49,3 +61,23 @@ runClient = do
       print pos
       print message
       print em
+
+getClients :: ClientEnv -> Client IO IntAPI
+getClients clientEnv =
+  hoistClient
+    intAPI
+    ( fmap (either (error . show) id)
+        . flip runClientM clientEnv
+    )
+    (client intAPI)
+
+runHoistedClient :: IO ()
+runHoistedClient = do
+  manager' <- newManager defaultManagerSettings
+  let getInt :: IO Int
+      postInt :: Int -> IO Int
+      getInt :<|> postInt =
+        getClients (mkClientEnv manager' (BaseUrl Http "localhost" 8081 ""))
+  i <- getInt
+  j <- postInt i
+  print (i, j)

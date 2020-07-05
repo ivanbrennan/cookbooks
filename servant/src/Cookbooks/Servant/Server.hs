@@ -9,6 +9,9 @@ module Cookbooks.Servant.Server
     Position (..),
     api,
     runServer,
+    IntAPI,
+    intAPI,
+    runIntServer,
   )
 where
 
@@ -116,3 +119,24 @@ runServer :: IO ()
 runServer = do
   putStrLn "Starting server"
   run 8081 app
+
+type IntAPI = Get '[JSON] Int :<|> Capture "n" Int :> Post '[JSON] Int
+
+intAPI :: Proxy IntAPI
+intAPI = Proxy
+
+intServer :: Server IntAPI
+intServer = getInt :<|> postInt
+  where
+    getInt :: Handler Int
+    getInt = pure 12
+    postInt :: Int -> Handler Int
+    postInt i = pure (i + 1)
+
+intApp :: Application
+intApp = serve intAPI intServer
+
+runIntServer :: IO ()
+runIntServer = do
+  putStrLn "Starting int server"
+  run 8081 intApp
