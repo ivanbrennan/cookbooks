@@ -1,60 +1,161 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Cookbooks.Servant.Server
-  ( runServer,
+  ( ClientInfo (..),
+    Email (..),
+    HelloMessage (..),
+    Position (..),
+    api,
+    runServer,
+    IntAPI,
+    intAPI,
+    runIntServer,
+    streamAPI,
+    runStreamServer,
   )
 where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.List (intercalate)
 import Data.Proxy (Proxy (Proxy))
-import Data.Time (Day, fromGregorian)
 import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant
-  ( (:>),
+  ( (:<|>) ((:<|>)),
+    (:>),
     Application,
+    Capture,
+    Get,
+    Handler,
     JSON,
     NewlineFraming,
+    Post,
+    QueryParam,
+    ReqBody,
+    Server,
     SourceIO,
     StreamGet,
     serve,
   )
 import Servant.Types.SourceT (source)
 
-data User
-  = User
-      { name :: String,
-        age :: Int,
-        email :: String,
-        registration_date :: Day
+port :: Int
+port = 8081
+
+data Position
+  = Position
+      { xCoord :: Int,
+        yCoord :: Int
+      }
+  deriving (Show, Generic)
+
+instance FromJSON Position
+
+instance ToJSON Position
+
+newtype HelloMessage = HelloMessage {msg :: String}
+  deriving (Show, Generic)
+
+instance FromJSON HelloMessage
+
+instance ToJSON HelloMessage
+
+data ClientInfo
+  = ClientInfo
+      { clientName :: String,
+        clientEmail :: String,
+        clientAge :: Int,
+        clientInterestedIn :: [String]
       }
   deriving (Generic)
 
-instance FromJSON User
+instance FromJSON ClientInfo
 
-instance ToJSON User
+instance ToJSON ClientInfo
 
-isaac :: User
-isaac = User "Isaac Newton" 372 "isaac@newton.co.uk" (fromGregorian 1683 3 1)
+data Email
+  = Email
+      { from :: String,
+        to :: String,
+        subject :: String,
+        body :: String
+      }
+  deriving (Show, Generic)
 
-albert :: User
-albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
+instance FromJSON Email
 
-type StreamAPI = "userStream" :> StreamGet NewlineFraming JSON (SourceIO User)
+instance ToJSON Email
+
+type API =
+  "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
+    :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
+    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
+
+api :: Proxy API
+api = Proxy
+
+server :: Server API
+server = position :<|> hello :<|> marketing
+  where
+    position :: Int -> Int -> Handler Position
+    position x y = pure (Position x y)
+    hello :: Maybe String -> Handler HelloMessage
+    hello Nothing = pure $ HelloMessage "Hello, anonymous"
+    hello (Just s) = pure $ HelloMessage ("Hello, " ++ s)
+    marketing :: ClientInfo -> Handler Email
+    marketing c =
+      pure $
+        Email
+          { from = "great@company.com",
+            to = clientEmail c,
+            subject = "Hey " ++ clientName c ++ ", we miss you!",
+            body =
+              "Hi "
+                ++ clientName c
+                ++ ",\n\nSince you've recently turned "
+                ++ show (clientAge c)
+                ++ ", have you checked out our latest "
+                ++ intercalate "," (clientInterestedIn c)
+                ++ " products?"
+          }
+
+app :: Application
+app = serve api server
+
+runServer :: IO ()
+runServer = run port app
+
+type IntAPI = Get '[JSON] Int :<|> Capture "n" Int :> Post '[JSON] Int
+
+intAPI :: Proxy IntAPI
+intAPI = Proxy
+
+intServer :: Server IntAPI
+intServer = getInt :<|> postInt
+  where
+    getInt :: Handler Int
+    getInt = pure 12
+    postInt :: Int -> Handler Int
+    postInt i = pure (i + 1)
+
+intApp :: Application
+intApp = serve intAPI intServer
+
+runIntServer :: IO ()
+runIntServer = run port intApp
+
+type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (SourceIO Position)
 
 streamAPI :: Proxy StreamAPI
 streamAPI = Proxy
 
-streamUsers :: SourceIO User
-streamUsers = source [isaac, albert, albert]
+streamPositions :: SourceIO Position
+streamPositions = source [Position 0 0, Position 0 1, Position 1 0]
 
-app :: Application
-app = serve streamAPI (pure streamUsers)
+streamApp :: Application
+streamApp = serve streamAPI (pure streamPositions)
 
-runServer :: IO ()
-runServer = do
-  putStrLn "Starting server"
-  run 8081 app
+runStreamServer :: IO ()
+runStreamServer = run port streamApp

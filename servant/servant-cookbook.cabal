@@ -10,19 +10,63 @@ extra-source-files:
     README.md
 
 library
-    exposed-modules:  Cookbooks.Servant.Server
+    exposed-modules:
+        Cookbooks.Servant.Client
+        Cookbooks.Servant.Server
+
     hs-source-dirs:   src
     default-language: Haskell2010
     build-depends:
         aeson >=1.4 && <1.5,
         base >=4.13 && <4.14,
+        http-client >=0.6 && <0.7,
         servant >=0.17 && <0.18,
+        servant-client >=0.17 && <0.18,
         servant-server >=0.17 && <0.18,
-        time >=1.9 && <1.10,
         warp >=3.3 && <3.4
+
+executable servant-client-cookbook
+    main-is:          Client.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
 
 executable servant-server-cookbook
     main-is:          Server.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-hoisted-client-cookbook
+    main-is:          HoistedClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-int-server-cookbook
+    main-is:          IntServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-stream-client-cookbook
+    main-is:          StreamClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-stream-server-cookbook
+    main-is:          StreamServer.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
