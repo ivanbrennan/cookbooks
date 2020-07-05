@@ -1,9 +1,11 @@
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Cookbooks.Servant.Client
   ( runClient,
     runHoistedClient,
+    runStreamClient,
   )
 where
 
@@ -15,9 +17,10 @@ import Cookbooks.Servant.Server
     Position,
     api,
     intAPI,
+    streamAPI,
   )
 import Network.HTTP.Client (defaultManagerSettings, newManager)
-import Servant ((:<|>) ((:<|>)))
+import Servant ((:<|>) ((:<|>)), SourceIO)
 import Servant.Client
   ( BaseUrl (BaseUrl),
     Client,
@@ -29,6 +32,8 @@ import Servant.Client
     mkClientEnv,
     runClientM,
   )
+import qualified Servant.Client.Streaming as S
+import Servant.Types.SourceT (foreach)
 
 position ::
   Int ->
@@ -51,10 +56,13 @@ queries = do
   em <- marketing (ClientInfo "Alp" "alp@foo.com" 26 ["haskell", "mathematics"])
   pure (pos, message, em)
 
+baseUrl :: BaseUrl
+baseUrl = BaseUrl Http "localhost" 8081 ""
+
 runClient :: IO ()
 runClient = do
   manager' <- newManager defaultManagerSettings
-  res <- runClientM queries (mkClientEnv manager' (BaseUrl Http "localhost" 8081 ""))
+  res <- runClientM queries (mkClientEnv manager' baseUrl)
   case res of
     Left err -> putStrLn $ "Error: " ++ show err
     Right (pos, message, em) -> do
@@ -77,7 +85,20 @@ runHoistedClient = do
   let getInt :: IO Int
       postInt :: Int -> IO Int
       getInt :<|> postInt =
-        getClients (mkClientEnv manager' (BaseUrl Http "localhost" 8081 ""))
+        getClients (mkClientEnv manager' baseUrl)
   i <- getInt
   j <- postInt i
   print (i, j)
+
+posStream :: S.ClientM (SourceIO Position)
+posStream = S.client streamAPI
+
+printSourceIO :: Show a => ClientEnv -> S.ClientM (SourceIO a) -> IO ()
+printSourceIO env c = S.withClientM c env $ \case
+  Left err -> putStrLn $ "Error: " ++ show err
+  Right rs -> foreach fail print rs
+
+runStreamClient :: IO ()
+runStreamClient = do
+  manager' <- newManager defaultManagerSettings
+  printSourceIO (mkClientEnv manager' baseUrl) posStream

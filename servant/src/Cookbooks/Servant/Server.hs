@@ -12,6 +12,8 @@ module Cookbooks.Servant.Server
     IntAPI,
     intAPI,
     runIntServer,
+    streamAPI,
+    runStreamServer,
   )
 where
 
@@ -28,12 +30,16 @@ import Servant
     Get,
     Handler,
     JSON,
+    NewlineFraming,
     Post,
     QueryParam,
     ReqBody,
     Server,
+    SourceIO,
+    StreamGet,
     serve,
   )
+import Servant.Types.SourceT (source)
 
 data Position
   = Position
@@ -140,3 +146,19 @@ runIntServer :: IO ()
 runIntServer = do
   putStrLn "Starting int server"
   run 8081 intApp
+
+type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (SourceIO Position)
+
+streamAPI :: Proxy StreamAPI
+streamAPI = Proxy
+
+streamPositions :: SourceIO Position
+streamPositions = source [Position 0 0, Position 0 1, Position 1 0]
+
+streamApp :: Application
+streamApp = serve streamAPI (pure streamPositions)
+
+runStreamServer :: IO ()
+runStreamServer = do
+  putStrLn "Starting stream server"
+  run 8081 streamApp
