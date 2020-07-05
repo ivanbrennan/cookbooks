@@ -3,7 +3,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
-module Cookbooks.Servant
+module Cookbooks.Servant.Server
   ( runServer,
   )
 where
