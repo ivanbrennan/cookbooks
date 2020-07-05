@@ -1,6 +1,6 @@
 module Main where
 
-import Cookbooks.Servant (runServer)
+import Cookbooks.Servant.Server (runServer)
 
 main :: IO ()
 main = runServer

@@ -2,14 +2,14 @@ PROJECT_ROOT ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 HASKELL_DIRS := $(addprefix $(PROJECT_ROOT)/,app src)
 HASKELL_FILES := $(shell find $(HASKELL_DIRS) -name '*.hs')
 
-.PHONY: build
-build:
-	cabal v2-build
+.PHONY: build-server
+build-server:
+	cabal v2-build servant-server-cookbook
 
-.PHONY: watch
-watch:
+.PHONY: watch-server
+watch-server:
 	ghcid \
-		--command='cabal v2-repl' \
+		--command='cabal v2-repl servant-server-cookbook' \
 		--no-height-limit \
 		--reverse-errors \
 		--clear \
@@ -19,9 +19,9 @@ watch:
 format:
 	ormolu --mode inplace $(HASKELL_FILES)
 
-.PHONY: run
-run:
-	cabal v2-run
+.PHONY: run-server
+run-server:
+	cabal v2-run servant-server-cookbook
 
 .PHONY: clean
 clean:
