@@ -41,6 +41,9 @@ import Servant
   )
 import Servant.Types.SourceT (source)
 
+port :: Int
+port = 8081
+
 data Position
   = Position
       { xCoord :: Int,
@@ -122,9 +125,7 @@ app :: Application
 app = serve api server
 
 runServer :: IO ()
-runServer = do
-  putStrLn "Starting server"
-  run 8081 app
+runServer = run port app
 
 type IntAPI = Get '[JSON] Int :<|> Capture "n" Int :> Post '[JSON] Int
 
@@ -143,9 +144,7 @@ intApp :: Application
 intApp = serve intAPI intServer
 
 runIntServer :: IO ()
-runIntServer = do
-  putStrLn "Starting int server"
-  run 8081 intApp
+runIntServer = run port intApp
 
 type StreamAPI = "positionStream" :> StreamGet NewlineFraming JSON (SourceIO Position)
 
@@ -159,6 +158,4 @@ streamApp :: Application
 streamApp = serve streamAPI (pure streamPositions)
 
 runStreamServer :: IO ()
-runStreamServer = do
-  putStrLn "Starting stream server"
-  run 8081 streamApp
+runStreamServer = run port streamApp
