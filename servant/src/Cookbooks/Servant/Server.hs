@@ -1,58 +1,116 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Cookbooks.Servant.Server
-  ( runServer,
+  ( ClientInfo (..),
+    Email (..),
+    HelloMessage (..),
+    Position (..),
+    api,
+    runServer,
   )
 where
 
 import Data.Aeson (FromJSON, ToJSON)
+import Data.List (intercalate)
 import Data.Proxy (Proxy (Proxy))
-import Data.Time (Day, fromGregorian)
 import GHC.Generics (Generic)
 import Network.Wai.Handler.Warp (run)
 import Servant
-  ( (:>),
+  ( (:<|>) ((:<|>)),
+    (:>),
     Application,
+    Capture,
+    Get,
+    Handler,
     JSON,
-    NewlineFraming,
-    SourceIO,
-    StreamGet,
+    Post,
+    QueryParam,
+    ReqBody,
+    Server,
     serve,
   )
-import Servant.Types.SourceT (source)
 
-data User
-  = User
-      { name :: String,
-        age :: Int,
-        email :: String,
-        registration_date :: Day
+data Position
+  = Position
+      { xCoord :: Int,
+        yCoord :: Int
+      }
+  deriving (Show, Generic)
+
+instance FromJSON Position
+
+instance ToJSON Position
+
+newtype HelloMessage = HelloMessage {msg :: String}
+  deriving (Show, Generic)
+
+instance FromJSON HelloMessage
+
+instance ToJSON HelloMessage
+
+data ClientInfo
+  = ClientInfo
+      { clientName :: String,
+        clientEmail :: String,
+        clientAge :: Int,
+        clientInterestedIn :: [String]
       }
   deriving (Generic)
 
-instance FromJSON User
+instance FromJSON ClientInfo
 
-instance ToJSON User
+instance ToJSON ClientInfo
 
-isaac :: User
-isaac = User "Isaac Newton" 372 "isaac@newton.co.uk" (fromGregorian 1683 3 1)
+data Email
+  = Email
+      { from :: String,
+        to :: String,
+        subject :: String,
+        body :: String
+      }
+  deriving (Show, Generic)
 
-albert :: User
-albert = User "Albert Einstein" 136 "ae@mc2.org" (fromGregorian 1905 12 1)
+instance FromJSON Email
 
-type StreamAPI = "userStream" :> StreamGet NewlineFraming JSON (SourceIO User)
+instance ToJSON Email
 
-streamAPI :: Proxy StreamAPI
-streamAPI = Proxy
+type API =
+  "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
+    :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
+    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
 
-streamUsers :: SourceIO User
-streamUsers = source [isaac, albert, albert]
+api :: Proxy API
+api = Proxy
+
+server :: Server API
+server = position :<|> hello :<|> marketing
+  where
+    position :: Int -> Int -> Handler Position
+    position x y = pure (Position x y)
+    hello :: Maybe String -> Handler HelloMessage
+    hello Nothing = pure $ HelloMessage "Hello, anonymous"
+    hello (Just s) = pure $ HelloMessage ("Hello, " ++ s)
+    marketing :: ClientInfo -> Handler Email
+    marketing c =
+      pure $
+        Email
+          { from = "great@company.com",
+            to = clientEmail c,
+            subject = "Hey " ++ clientName c ++ ", we miss you!",
+            body =
+              "Hi "
+                ++ clientName c
+                ++ ",\n\nSince you've recently turned "
+                ++ show (clientAge c)
+                ++ ", have you checked out our latest "
+                ++ intercalate "," (clientInterestedIn c)
+                ++ " products?"
+          }
 
 app :: Application
-app = serve streamAPI (pure streamUsers)
+app = serve api server
 
 runServer :: IO ()
 runServer = do

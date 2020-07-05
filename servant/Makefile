@@ -23,6 +23,10 @@ format:
 run-server:
 	cabal v2-run servant-server-cookbook
 
+.PHONY: run-client
+run-client:
+	cabal v2-run servant-client-cookbook
+
 .PHONY: clean
 clean:
 	rm -rf $(PROJECT_ROOT)/dist

@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE TypeOperators #-}
 
 module Cookbooks.Servant.Client
@@ -7,76 +6,17 @@ module Cookbooks.Servant.Client
   )
 where
 
-import Data.Aeson (FromJSON, ToJSON)
-import Data.Proxy (Proxy (Proxy))
-import GHC.Generics (Generic)
+import Cookbooks.Servant.Server (ClientInfo (ClientInfo), Email, HelloMessage, Position, api)
 import Network.HTTP.Client (defaultManagerSettings, newManager)
-import Servant
-  ( (:<|>) ((:<|>)),
-    (:>),
-    Capture,
-    EmptyAPI,
-    Get,
-    JSON,
-    Post,
-    QueryParam,
-    ReqBody,
-  )
+import Servant ((:<|>) ((:<|>)))
 import Servant.Client
   ( BaseUrl (BaseUrl),
     ClientM,
-    EmptyClient (EmptyClient),
     Scheme (Http),
     client,
     mkClientEnv,
     runClientM,
   )
-
-data Position
-  = Position
-      { xCoord :: Int,
-        yCoord :: Int
-      }
-  deriving (Show, Generic)
-
-instance FromJSON Position
-
-newtype HelloMessage = HelloMessage {msg :: String}
-  deriving (Show, Generic)
-
-instance FromJSON HelloMessage
-
-data ClientInfo
-  = ClientInfo
-      { clientName :: String,
-        clientEmail :: String,
-        clientAge :: Int,
-        clientInterestedIn :: [String]
-      }
-  deriving (Generic)
-
-instance FromJSON ClientInfo
-
-instance ToJSON ClientInfo
-
-data Email
-  = Email
-      { from :: String,
-        to :: String,
-        subject :: String,
-        body :: String
-      }
-  deriving (Show, Generic)
-
-instance FromJSON Email
-
-type API =
-  "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
-    :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
-    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
-
-api :: Proxy API
-api = Proxy
 
 position ::
   Int ->
@@ -91,25 +31,6 @@ marketing ::
   ClientInfo ->
   ClientM Email
 position :<|> hello :<|> marketing = client api
-
-type API' = API :<|> EmptyAPI
-
-api' :: Proxy API'
-api' = Proxy
-
-position' ::
-  Int ->
-  Int ->
-  ClientM Position
-
-hello' ::
-  Maybe String ->
-  ClientM HelloMessage
-
-marketing' ::
-  ClientInfo ->
-  ClientM Email
-(position' :<|> hello' :<|> marketing') :<|> EmptyClient = client api'
 
 queries :: ClientM (Position, HelloMessage, Email)
 queries = do
