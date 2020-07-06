@@ -13,9 +13,8 @@ import Data.Aeson (ToJSON)
 import Data.Proxy (Proxy (Proxy))
 import Data.Text (Text)
 import qualified Data.Text as T
-import qualified Data.Text.IO as T (readFile, writeFile)
+import qualified Data.Text.IO as T (writeFile)
 import GHC.Generics (Generic)
-import qualified Language.Javascript.JQuery
 import Network.Wai.Handler.Warp (run)
 import Servant
   ( (:<|>) ((:<|>)),
@@ -29,7 +28,7 @@ import Servant
     serve,
     serveDirectoryFileServer,
   )
-import Servant.JS (jquery, jsForAPI)
+import Servant.JS (vanillaJS, jsForAPI)
 import System.Random (getStdRandom, randomR)
 
 data Point
@@ -125,11 +124,8 @@ runJavascriptServer = do
   writeJSFiles
   run 8000 app
 
-apiJS1 :: Text
-apiJS1 = jsForAPI api jquery
+apiJS2 :: Text
+apiJS2 = jsForAPI api vanillaJS
 
 writeJSFiles :: IO ()
-writeJSFiles = do
-  T.writeFile "static/api.js" apiJS1
-  jq <- T.readFile =<< Language.Javascript.JQuery.file
-  T.writeFile "static/jq.js" jq
+writeJSFiles = T.writeFile "static/api.js" apiJS2

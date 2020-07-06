@@ -1,30 +1,33 @@
 /* book search */
+const $ = document.querySelector.bind(document);
+
 function updateResults(data)
 {
   console.log(data);
-  $('#results').html("");
-  $('#query').text("\"" + data.query + "\"");
+  $('#results').innerHTML = "";
+  $('#query').innerHTML = "\"" + data.query + "\"";
   for(var i = 0; i < data.results.length; i++)
   {
-    $('#results').append(renderBook(data.results[i]));
+    $('#results').appendChild(renderBook(data.results[i]));
   }
 }
 
 function renderBook(book)
 {
-  var li = '<li><strong>' + book.title + '</strong>, <i>'
-         + book.author + '</i> - ' + book.year + '</li>';
+  var li = document.createElement('LI');
+  li.innerHTML = '<strong>' + book.title + '</strong>, <i>'
+               + book.author + '</i> - ' + book.year;
   return li;
 }
 
 function searchBooks()
 {
-  var q = $('#q').val();
+  var q = $('#q').value;
   getBooks(q, updateResults, console.log)
 }
 
 searchBooks();
-$('#q').keyup(function () {
+$('#q').addEventListener("keyup", function () {
   searchBooks();
 });
 
@@ -49,7 +52,7 @@ function f(data)
 
 function update(id, val)
 {
-  $(id).text(val)
+  $(id).innerHTML = val;
 }
 
 function refresh()
