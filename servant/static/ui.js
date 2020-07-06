@@ -23,7 +23,9 @@ function renderBook(book)
 function searchBooks()
 {
   var q = $('#q').value;
-  getBooks(q, updateResults, console.log)
+  getBooks(q)
+    .then(rsp => updateResults(rsp.data))
+    .catch(console.log)
 }
 
 searchBooks();
@@ -57,7 +59,9 @@ function update(id, val)
 
 function refresh()
 {
-  getPoint(f, console.log);
+  getPoint()
+    .then(rsp => f(rsp.data))
+    .catch(console.log);
 }
 
 window.setInterval(refresh, 200);
