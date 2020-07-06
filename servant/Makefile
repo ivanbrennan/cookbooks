@@ -2,10 +2,6 @@ PROJECT_ROOT ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 HASKELL_DIRS := $(addprefix $(PROJECT_ROOT)/,app src)
 HASKELL_FILES := $(shell find $(HASKELL_DIRS) -name '*.hs')
 
-.PHONY: build
-build:
-	cabal v2-build
-
 .PHONY: watch
 watch:
 	ghcid \
@@ -14,6 +10,10 @@ watch:
 		--reverse-errors \
 		--clear \
 		--lint
+
+.PHONY: build
+build:
+	cabal v2-build
 
 .PHONY: format
 format:
