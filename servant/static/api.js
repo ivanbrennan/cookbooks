@@ -1,16 +1,18 @@
 
-var getPoint = function()
+var getPoint = function($http)
 {
-  return axios({ url: '/point'
-    , method: 'get'
+  return $http(
+    { url: '/point'
+    , method: 'GET'
     });
 }
 
 
 
-var getBooks = function(q)
+var getBooks = function($http, q)
 {
-  return axios({ url: '/books' + '?q=' + encodeURIComponent(q)
-    , method: 'get'
+  return $http(
+    { url: '/books' + '?q=' + encodeURIComponent(q)
+    , method: 'GET'
     });
 }

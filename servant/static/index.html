@@ -1,26 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html ng-app="servantApp" lang="en">
   <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Content-Type" content"text/html; charset=UTF-8" />
     <title>servant-js Example</title>
   </head>
-  <body>
-    <h1>Books</h1>
-    <input type="search" name="q" id="q" placeholder="Search author or book title..." autocomplete="off"/>
+  <body ng-controller="servantController">
     <div>
-      <p>Results for <strong id="query">""</strong></p>
-      <ul id="results">
-      </ul>
+      <h1>Books</h1>
+      <input ng-model="q" ng-keyup="getBooks()" type="search" name="q" id="q" placeholder="Search author or book title..." autocomplete="off" />
+      <div>
+        <p>Results for <strong id="query">"{{ q }}"</strong></p>
+        <ul id="results">
+          <li ng-repeat="b in books">
+            <strong>{{ b.title }}</strong>, <i>{{ b.author }}</i> - {{ b.year }}
+          </li>
+        </ul>
+      </div>
+      <hr />
+      <h1>Approximating &pi;</h1>
+      <p>Count: <span ng-model="count" id="count">{{ count }}</span></p>
+      <p>Successes: <span ng-model="successes" id="successes">{{ successes }}</span></p>
+      <p ng-model="pi" id="pi">{{ pi }}</p>
     </div>
-    <hr />
-    <h1>Approximating &pi;</h1>
-    <p>Count: <span id="count">0</span></p>
-    <p>Successes: <span id="successes">0</span></p>
-    <p id="pi"></p>
-
-    <script type="text/javascript" src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
     <script type="text/javascript" src="/static/api.js"></script>
     <script type="text/javascript" src="/static/ui.js"></script>
-
   </body>

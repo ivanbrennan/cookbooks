@@ -1,67 +1,38 @@
-/* book search */
-const $ = document.querySelector.bind(document);
+var servantApp = angular.module('servantApp', []);
 
-function updateResults(data)
-{
-  console.log(data);
-  $('#results').innerHTML = "";
-  $('#query').innerHTML = "\"" + data.query + "\"";
-  for(var i = 0; i < data.results.length; i++)
-  {
-    $('#results').appendChild(renderBook(data.results[i]));
-  }
-}
+servantApp.controller('servantController', ['$scope', '$http', '$interval',
+  function($scope, $http, $interval) {
+    $scope.q = '';
+    $scope.count = 0;
+    $scope.successes = 0;
 
-function renderBook(book)
-{
-  var li = document.createElement('LI');
-  li.innerHTML = '<strong>' + book.title + '</strong>, <i>'
-               + book.author + '</i> - ' + book.year;
-  return li;
-}
+    var f = function(data) {
+      var x = data.x, y = data.y;
+      if(x*x + y*y <= 1)
+      {
+        $scope.successes++;
+      }
+      $scope.count++;
+      $scope.pi = 4*$scope.successes/$scope.count;
+    };
 
-function searchBooks()
-{
-  var q = $('#q').value;
-  getBooks(q)
-    .then(rsp => updateResults(rsp.data))
-    .catch(console.log)
-}
+    $scope.getPoint = function() {
+      getPoint($http)
+        .then(rsp => f(rsp.data))
+        .catch(console.log);
+    };
 
-searchBooks();
-$('#q').addEventListener("keyup", function () {
-  searchBooks();
-});
+    $scope.getBooks = function() {
+      getBooks($http, $scope.q)
+        .then(rsp => {
+          console.log(rsp.data);
+          $scope.books = rsp.data.results;
+        })
+        .catch(console.log);
+    };
 
-/* approximating pi */
-var count = 0;
-var successes = 0;
+    $scope.getBooks();
 
-function f(data)
-{
-  var x = data.x, y = data.y;
-  if(x*x + y*y <= 1)
-  {
-    successes++;
-  }
-
-  count++;
-
-  update('#count', count);
-  update('#successes', successes);
-  update('#pi', 4*successes/count);
-}
-
-function update(id, val)
-{
-  $(id).innerHTML = val;
-}
-
-function refresh()
-{
-  getPoint()
-    .then(rsp => f(rsp.data))
-    .catch(console.log);
-}
-
-window.setInterval(refresh, 200);
+    $interval($scope.getPoint, 200);
+  }]
+);
