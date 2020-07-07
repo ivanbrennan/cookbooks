@@ -1,4 +1,5 @@
-
+app.service('', function($http) {
+  return ({
 var getPoint = function($http)
 {
   return $http(
@@ -6,9 +7,7 @@ var getPoint = function($http)
     , method: 'GET'
     });
 }
-
-
-
+,
 var getBooks = function($http, q)
 {
   return $http(
@@ -16,3 +15,5 @@ var getBooks = function($http, q)
     , method: 'GET'
     });
 }
+});
+});

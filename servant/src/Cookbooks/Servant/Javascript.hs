@@ -28,7 +28,7 @@ import Servant
     serve,
     serveDirectoryFileServer,
   )
-import Servant.JS (angular, defAngularOptions, jsForAPI)
+import Servant.JS (angularService, defAngularOptions, jsForAPI)
 import System.Random (getStdRandom, randomR)
 
 data Point
@@ -124,8 +124,8 @@ runJavascriptServer = do
   writeJSFiles
   run 8000 app
 
-apiJS4 :: Text
-apiJS4 = jsForAPI api $ angular defAngularOptions
+apiJS5 :: Text
+apiJS5 = jsForAPI api $ angularService defAngularOptions
 
 writeJSFiles :: IO ()
-writeJSFiles = T.writeFile "static/api.js" apiJS4
+writeJSFiles = T.writeFile "static/api.js" apiJS5
