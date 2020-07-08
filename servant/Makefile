@@ -47,6 +47,10 @@ run-stream-client:
 run-javascript-server:
 	cabal v2-run servant-javascript-server-cookbook
 
+.PHONY: serve-docs
+serve-docs:
+	cabal v2-run serve-docs
+
 .PHONY: clean
 clean:
 	rm -rf $(PROJECT_ROOT)/dist
