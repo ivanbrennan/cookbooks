@@ -51,6 +51,10 @@ run-javascript-server:
 run-basic-auth-server:
 	cabal v2-run servant-basic-auth-server-cookbook
 
+.PHONY: run-gen-auth-server
+run-gen-auth-server:
+	cabal v2-run servant-gen-auth-server-cookbook
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
