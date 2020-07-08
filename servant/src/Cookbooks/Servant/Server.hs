@@ -7,8 +7,12 @@ module Cookbooks.Servant.Server
     Email (..),
     HelloMessage (..),
     Position (..),
+    ExampleAPI,
     api,
+    emailForClient,
+    port,
     runServer,
+    server,
     IntAPI,
     intAPI,
     runIntServer,
@@ -27,6 +31,7 @@ import Servant
     (:>),
     Application,
     Capture,
+    FormUrlEncoded,
     Get,
     Handler,
     JSON,
@@ -40,6 +45,7 @@ import Servant
     serve,
   )
 import Servant.Types.SourceT (source)
+import Web.FormUrlEncoded (FromForm, ToForm)
 
 port :: Int
 port = 8081
@@ -75,6 +81,10 @@ instance FromJSON ClientInfo
 
 instance ToJSON ClientInfo
 
+instance ToForm ClientInfo
+
+instance FromForm ClientInfo
+
 data Email
   = Email
       { from :: String,
@@ -88,15 +98,29 @@ instance FromJSON Email
 
 instance ToJSON Email
 
-type API =
+type ExampleAPI =
   "position" :> Capture "x" Int :> Capture "y" Int :> Get '[JSON] Position
     :<|> "hello" :> QueryParam "name" String :> Get '[JSON] HelloMessage
-    :<|> "marketing" :> ReqBody '[JSON] ClientInfo :> Post '[JSON] Email
+    :<|> "marketing" :> ReqBody '[JSON, FormUrlEncoded] ClientInfo :> Post '[JSON] Email
 
-api :: Proxy API
+api :: Proxy ExampleAPI
 api = Proxy
 
-server :: Server API
+emailForClient :: ClientInfo -> Email
+emailForClient c = Email from' to' subject' body'
+  where
+    from' = "great@company.com"
+    to' = clientEmail c
+    subject' = "Hey " ++ clientName c ++ ", we miss you!"
+    body' =
+      "Hi " ++ clientName c ++ ",\n\n"
+        ++ "Since you've recently turned "
+        ++ show (clientAge c)
+        ++ ", have you checked out our latest "
+        ++ intercalate ", " (clientInterestedIn c)
+        ++ " products? Give us a visit!"
+
+server :: Server ExampleAPI
 server = position :<|> hello :<|> marketing
   where
     position :: Int -> Int -> Handler Position
@@ -105,21 +129,7 @@ server = position :<|> hello :<|> marketing
     hello Nothing = pure $ HelloMessage "Hello, anonymous"
     hello (Just s) = pure $ HelloMessage ("Hello, " ++ s)
     marketing :: ClientInfo -> Handler Email
-    marketing c =
-      pure $
-        Email
-          { from = "great@company.com",
-            to = clientEmail c,
-            subject = "Hey " ++ clientName c ++ ", we miss you!",
-            body =
-              "Hi "
-                ++ clientName c
-                ++ ",\n\nSince you've recently turned "
-                ++ show (clientAge c)
-                ++ ", have you checked out our latest "
-                ++ intercalate "," (clientInterestedIn c)
-                ++ " products?"
-          }
+    marketing c = pure (emailForClient c)
 
 app :: Application
 app = serve api server
