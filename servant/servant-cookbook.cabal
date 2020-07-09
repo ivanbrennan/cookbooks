@@ -11,6 +11,7 @@ extra-source-files:
 
 library
     exposed-modules:
+        Cookbooks.Servant.Authentication
         Cookbooks.Servant.Client
         Cookbooks.Servant.Docs
         Cookbooks.Servant.Javascript
@@ -22,6 +23,8 @@ library
         aeson >=1.4 && <1.5,
         base >=4.13 && <4.14,
         bytestring >=0.10 && <0.11,
+        containers >=0.6 && <0.7,
+        cookie >=0.4 && <0.5,
         http-api-data >=0.4 && <0.5,
         http-client >=0.6 && <0.7,
         http-types >=0.12 && <0.13,
@@ -86,6 +89,22 @@ executable servant-stream-server-cookbook
 
 executable servant-javascript-server-cookbook
     main-is:          JavascriptServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-basic-auth-server-cookbook
+    main-is:          BasicAuthServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-gen-auth-server-cookbook
+    main-is:          GenAuthServer.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
