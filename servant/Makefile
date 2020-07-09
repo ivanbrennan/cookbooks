@@ -55,6 +55,10 @@ run-basic-auth-server:
 run-gen-auth-server:
 	cabal v2-run servant-gen-auth-server-cookbook
 
+.PHONY: run-structuring-apis
+run-structuring-apis:
+	cabal v2-run servant-structuring-apis
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
