@@ -59,6 +59,18 @@ run-gen-auth-server:
 run-structuring-apis:
 	cabal v2-run servant-structuring-apis
 
+.PHONY: run-generic-server
+run-generic-server:
+	cabal v2-run servant-generic-server -- run
+
+.PHONY: run-generic-server-custom
+run-generic-server-custom:
+	cabal v2-run servant-generic-server -- run-custom-monad
+
+.PHONY: run-generic-client
+run-generic-client:
+	cabal v2-run servant-generic-client
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
