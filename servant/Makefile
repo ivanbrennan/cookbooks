@@ -71,6 +71,10 @@ run-generic-server-custom:
 run-generic-client:
 	cabal v2-run servant-generic-client
 
+.PHONY: run-https-server
+run-https-server:
+	cabal v2-run servant-https-server
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs

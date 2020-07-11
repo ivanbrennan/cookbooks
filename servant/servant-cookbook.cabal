@@ -15,6 +15,7 @@ library
         Cookbooks.Servant.Client
         Cookbooks.Servant.Docs
         Cookbooks.Servant.Generics
+        Cookbooks.Servant.Https
         Cookbooks.Servant.Javascript
         Cookbooks.Servant.Server
         Cookbooks.Servant.StructuringApis
@@ -41,7 +42,8 @@ library
         text >=1.2 && <1.3,
         transformers >=0.5 && <0.6,
         wai >=3.2 && <3.3,
-        warp >=3.3 && <3.4
+        warp >=3.3 && <3.4,
+        warp-tls >=3.3 && <3.4
 
 executable servant-client-cookbook
     main-is:          Client.hs
@@ -141,6 +143,14 @@ executable servant-generic-server
 
 executable servant-generic-client
     main-is:          GenericClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-https-server
+    main-is:          HttpsServer.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
