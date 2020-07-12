@@ -95,6 +95,14 @@ run-postgresql-connection-pool:
 run-stm-server:
 	cabal v2-run servant-stm-server
 
+.PHONY: run-client-free-server
+run-client-free-server:
+	cabal v2-run servant-client-free -- server
+
+.PHONY: run-client-free-client
+run-client-free-client:
+	cabal v2-run servant-client-free -- client
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
