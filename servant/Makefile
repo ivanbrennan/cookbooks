@@ -91,6 +91,10 @@ run-sqlite-app:
 run-postgresql-connection-pool:
 	cabal v2-run servant-postgresql-connection-pool
 
+.PHONY: run-stm-server
+run-stm-server:
+	cabal v2-run servant-stm-server
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
