@@ -75,6 +75,14 @@ run-generic-client:
 run-https-server:
 	cabal v2-run servant-https-server
 
+.PHONY: run-overview-server
+run-overview-server:
+	cabal v2-run servant-overview-server
+
+.PHONY: run-overview-migrate
+run-overview-migrate:
+	cabal v2-run servant-overview-server -- migrate
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
