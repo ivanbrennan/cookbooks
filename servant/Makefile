@@ -83,6 +83,10 @@ run-overview-server:
 run-overview-migrate:
 	cabal v2-run servant-overview-server -- migrate
 
+.PHONY: run-sqlite-app
+run-sqlite-app:
+	cabal v2-run servant-sqlite-app
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
