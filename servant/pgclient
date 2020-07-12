@@ -1,0 +1,87 @@
+#! /usr/bin/env bash
+
+set -eu
+
+pids_dir="$PWD/nix/pids/pgclient"
+log_dir="$PWD/nix/log"
+
+if [ -t 1 ]
+then
+    bold=$(tput bold)
+    normal=$(tput sgr0)
+else
+    bold=
+    normal=
+fi
+
+add_client() {
+    mkdir -p "$pids_dir" && touch "$pids_dir/$PPID"
+    add_postgres
+}
+
+add_postgres() {
+    # Spin up a postgres server iff PGHOST is a Unix-domain socket.
+    # Otherwise, assume the host is already up and running.
+    host_is_unix_socket || return 0
+
+    if [ -d "$PGDATA" ]
+    then
+        start_postgres
+    else
+        printf '%sInitializing Postgres%s...\n' "$bold" "$normal"
+        pg_ctl initdb --silent --options='--auth=trust'
+        start_postgres && createdb $PGDATABASE
+    fi
+}
+
+start_postgres() {
+    if postgres_is_stopped
+    then
+        chmod -R 700 "$PGDATA"
+        # We'll use a Unix-domain socket we control, and avoid listening for
+        # TCP connections. This prevents conflicts with any other postgres
+        # server the host is running, even if it's listening on the same port.
+        local logfile="${log_dir}/pg.log"
+        mkdir -p "$PGHOST" "${logfile%/*}"
+        ( set -m
+          pg_ctl start --wait --silent --log "$logfile" --options="-k $PGHOST -h ''"
+        )
+    fi
+}
+
+host_is_unix_socket() {
+    [ "${PGHOST:0:1}" = "/" ]
+}
+
+postgres_is_stopped() {
+    pg_isready --quiet
+    (( $? == 2 ))
+}
+
+remove_client() {
+    rm -f "$pids_dir/$PPID"
+
+    if [ -n "$(find "$pids_dir" -prune -empty)" ]
+    then
+        stop_postgres
+    fi
+}
+
+stop_postgres() {
+    # Shut down the postgres server iff PGHOST is a Unix-domain socket.
+    # Otherwise, it's being managed by some other host/process.
+    host_is_unix_socket || return 0
+
+    pg_isready --quiet || return 0
+    pg_ctl stop --silent --no-wait --mode=smart
+}
+
+case "$1" in
+    add)
+        add_client ;;
+    remove)
+        remove_client ;;
+    *)
+        echo "Usage: pgclient {add | remove}" >&2
+        exit 1 ;;
+esac
