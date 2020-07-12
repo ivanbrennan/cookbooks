@@ -87,6 +87,10 @@ run-overview-migrate:
 run-sqlite-app:
 	cabal v2-run servant-sqlite-app
 
+.PHONY: run-postgresql-connection-pool
+run-postgresql-connection-pool:
+	cabal v2-run servant-postgresql-connection-pool
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
