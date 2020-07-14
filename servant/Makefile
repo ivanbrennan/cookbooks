@@ -103,6 +103,10 @@ run-client-free-server:
 run-client-free-client:
 	cabal v2-run servant-client-free -- client
 
+.PHONY: run-another-basic-auth
+run-another-basic-auth:
+	cabal v2-run servant-another-basic-auth
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs

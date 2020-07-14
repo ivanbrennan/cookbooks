@@ -11,6 +11,7 @@ extra-source-files:
 
 library
     exposed-modules:
+        Cookbooks.Servant.AnotherBasicAuth
         Cookbooks.Servant.Authentication
         Cookbooks.Servant.Client
         Cookbooks.Servant.ClientFree
@@ -206,6 +207,14 @@ executable servant-stm-server
 
 executable servant-client-free
     main-is:          ClientFree.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-another-basic-auth
+    main-is:          AnotherBasicAuth.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
