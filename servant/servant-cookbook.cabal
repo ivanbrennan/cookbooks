@@ -13,6 +13,7 @@ library
     exposed-modules:
         Cookbooks.Servant.AnotherBasicAuth
         Cookbooks.Servant.Authentication
+        Cookbooks.Servant.Streaming
         Cookbooks.Servant.Client
         Cookbooks.Servant.ClientFree
         Cookbooks.Servant.Docs
@@ -215,6 +216,14 @@ executable servant-client-free
 
 executable servant-another-basic-auth
     main-is:          AnotherBasicAuth.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-basic-streaming
+    main-is:          BasicStreaming.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:

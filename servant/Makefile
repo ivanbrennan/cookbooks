@@ -107,6 +107,14 @@ run-client-free-client:
 run-another-basic-auth:
 	cabal v2-run servant-another-basic-auth
 
+.PHONY: run-basic-streaming-server
+run-basic-streaming-server:
+	cabal v2-run servant-basic-streaming server
+
+.PHONY: run-basic-streaming-client
+run-basic-streaming-client:
+	cabal v2-run servant-basic-streaming client 10
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
