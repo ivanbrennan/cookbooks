@@ -15,7 +15,22 @@ import Data.Maybe (fromMaybe)
 import Data.Proxy (Proxy (Proxy))
 import Network.HTTP.Client (defaultManagerSettings, newManager)
 import qualified Network.Wai.Handler.Warp as Warp
-import Servant ((:<|>) ((:<|>)), (:>), Application, Capture, JSON, NewlineFraming, NoFraming, OctetStream, Server, SourceIO, StreamBody, StreamGet, StreamPost, serve)
+import Servant
+  ( (:<|>) ((:<|>)),
+    (:>),
+    Application,
+    Capture,
+    JSON,
+    NewlineFraming,
+    NoFraming,
+    OctetStream,
+    Server,
+    SourceIO,
+    StreamBody,
+    StreamGet,
+    StreamPost,
+    serve,
+  )
 import Servant.Client.Streaming (Client, ClientM, client, mkClientEnv, parseBaseUrl, withClientM)
 import qualified Servant.Types.SourceT as S
 import System.Environment (getArgs, lookupEnv)
