@@ -115,6 +115,10 @@ run-basic-streaming-server:
 run-basic-streaming-client:
 	cabal v2-run servant-basic-streaming client 10
 
+.PHONY: run-jwt-server
+run-jwt-server:
+	cabal v2-run servant-jwt-server
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
