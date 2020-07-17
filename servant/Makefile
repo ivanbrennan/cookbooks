@@ -119,6 +119,10 @@ run-basic-streaming-client:
 run-jwt-server:
 	cabal v2-run servant-jwt-server
 
+.PHONY: run-hoisted-server
+run-hoisted-server:
+	cabal v2-run servant-hoisted-server
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
