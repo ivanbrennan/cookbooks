@@ -123,6 +123,10 @@ run-jwt-server:
 run-hoisted-server:
 	cabal v2-run servant-hoisted-server
 
+.PHONY: run-file-upload
+run-file-upload:
+	cabal v2-run servant-file-upload
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs

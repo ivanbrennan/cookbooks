@@ -18,6 +18,7 @@ library
         Cookbooks.Servant.ClientFree
         Cookbooks.Servant.Docs
         Cookbooks.Servant.Generics
+        Cookbooks.Servant.FileUpload
         Cookbooks.Servant.HoistedServer
         Cookbooks.Servant.Https
         Cookbooks.Servant.Javascript
@@ -47,6 +48,7 @@ library
         lens >=4.18 && <4.19,
         monad-logger >=0.3 && <0.4,
         mtl >=2.2 && <2.3,
+        network >=3.1 && <3.2,
         persistent >=2.10 && <2.11,
         persistent-postgresql >=2.10 && <2.11,
         persistent-template >=2.8 && <2.9,
@@ -61,6 +63,7 @@ library
         servant-client-core >=0.17 && <0.18,
         servant-docs >=0.11 && <0.12,
         servant-js >=0.9 && <0.10,
+        servant-multipart >=0.11 && <0.12,
         servant-server >=0.17 && <0.18,
         sqlite-simple >=0.4 && <0.5,
         stm >=2.5 && <2.6,
@@ -250,6 +253,14 @@ executable servant-jwt-server
 
 executable servant-hoisted-server
     main-is:          HoistedServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-file-upload
+    main-is:          FileUpload.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
