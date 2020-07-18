@@ -24,6 +24,7 @@ library
         Cookbooks.Servant.Javascript
         Cookbooks.Servant.JWT
         Cookbooks.Servant.Overview
+        Cookbooks.Servant.Pagination
         Cookbooks.Servant.PostgreSQLConnectionPool
         Cookbooks.Servant.Server
         Cookbooks.Servant.SQLite
@@ -64,6 +65,7 @@ library
         servant-docs >=0.11 && <0.12,
         servant-js >=0.9 && <0.10,
         servant-multipart >=0.11 && <0.12,
+        servant-pagination >=2.3 && <2.4,
         servant-server >=0.17 && <0.18,
         sqlite-simple >=0.4 && <0.5,
         stm >=2.5 && <2.6,
@@ -261,6 +263,14 @@ executable servant-hoisted-server
 
 executable servant-file-upload
     main-is:          FileUpload.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-paginated-server
+    main-is:          PaginatedServer.hs
     hs-source-dirs:   app
     default-language: Haskell2010
     build-depends:
