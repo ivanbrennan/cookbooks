@@ -135,6 +135,10 @@ run-paginated-server:
 run-curl:
 	cabal v2-run servant-curl
 
+.PHONY: run-sentry
+run-sentry:
+	cabal v2-run servant-sentry
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
