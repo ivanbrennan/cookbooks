@@ -131,6 +131,10 @@ run-file-upload:
 run-paginated-server:
 	cabal v2-run servant-paginated-server
 
+.PHONY: run-curl
+run-curl:
+	cabal v2-run servant-curl
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
