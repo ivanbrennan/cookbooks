@@ -127,6 +127,10 @@ run-hoisted-server:
 run-file-upload:
 	cabal v2-run servant-file-upload
 
+.PHONY: run-paginated-server
+run-paginated-server:
+	cabal v2-run servant-paginated-server
+
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
