@@ -1,6 +1,8 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -10,6 +12,7 @@ module Cookbooks.Servant.Pagination
   )
 where
 
+import Control.Applicative ((<|>))
 import Data.Aeson (ToJSON, genericToJSON)
 import qualified Data.Aeson as Aeson
 import Data.Maybe (fromMaybe)
@@ -34,9 +37,12 @@ import Servant.Pagination
     RangeType,
     Ranges,
     applyRange,
+    defaultOptions,
+    defaultRangeLimit,
     extractRange,
     getDefaultRange,
     getFieldValue,
+    getRangeOptions,
     returnRange,
   )
 
@@ -70,26 +76,42 @@ instance HasPagination Color "name" where
 -- getRangeOptions :: Proxy "name" -> Proxy Color -> RangeOptions
 -- getDefaultRange :: Proxy Color -> Range "name" String
 
+instance HasPagination Color "hex" where
+  type RangeType Color "hex" = String
+  getFieldValue _ = hex
+
+instance HasPagination Color "rgb" where
+  type RangeType Color "rgb" = Int
+  getFieldValue _ = sum . rgb
+  getRangeOptions _ _ = defaultOptions {defaultRangeLimit = 5}
+
 defaultRange :: Range "name" String
 defaultRange =
   getDefaultRange (Proxy @Color)
 
 type API =
   "colors"
-    :> Header "Range" (Ranges '["name"] Color)
-    :> GetPartialContent '[JSON] (Headers MyHeaders [Color])
-
-type MyHeaders =
-  Header "Total-Count" Int ': PageHeaders '["name"] Color
+    :> Header "Range" (Ranges '["name", "hex", "rgb"] Color)
+    :> GetPartialContent '[JSON]
+         ( Headers
+             (Header "Total-Count" Int ': PageHeaders '["name", "hex", "rgb"] Color)
+             [Color]
+         )
 
 server :: Server API
-server = handler
+server = fmap (addHeader (length colors)) . handler
   where
-    handler :: Maybe (Ranges '["name"] Color) -> Handler (Headers MyHeaders [Color])
-    handler mrange = do
-      let range =
-            fromMaybe defaultRange (mrange >>= extractRange)
-      addHeader (length colors) <$> returnRange range (applyRange range colors)
+    handler ::
+      Maybe (Ranges '["name", "hex", "rgb"] Color) ->
+      Handler (Headers (PageHeaders '["name", "hex", "rgb"] Color) [Color])
+    handler mrange =
+      fromMaybe (returnNameRange defaultRange) $
+        fmap returnNameRange (mrange >>= extractRange)
+          <|> fmap returnHexRange (mrange >>= extractRange)
+          <|> fmap returnRGBRange (mrange >>= extractRange)
+    returnNameRange (r :: Range "name" String) = returnRange r (applyRange r colors)
+    returnHexRange (r :: Range "hex" String) = returnRange r (applyRange r colors)
+    returnRGBRange (r :: Range "rgb" Int) = returnRange r (applyRange r colors)
 
 runPaginatedServer :: IO ()
 runPaginatedServer =
