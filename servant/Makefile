@@ -1,5 +1,5 @@
 PROJECT_ROOT ?= $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
-HASKELL_DIRS := $(addprefix $(PROJECT_ROOT)/,app src)
+HASKELL_DIRS := $(addprefix $(PROJECT_ROOT)/,app src test)
 HASKELL_FILES := $(shell find $(HASKELL_DIRS) -name '*.hs')
 
 .PHONY: watch
@@ -142,6 +142,19 @@ run-sentry:
 .PHONY: serve-docs
 serve-docs:
 	cabal v2-run serve-docs
+
+.PHONY: test-suite
+test-suite:
+	ghcid \
+		--command='cabal v2-repl test-suite' \
+		--no-height-limit \
+		--reverse-errors \
+		--clear \
+		--lint
+
+.PHONY: run-test-suite
+run-test-suite:
+	cabal v2-run test-suite
 
 .PHONY: clean
 clean:
