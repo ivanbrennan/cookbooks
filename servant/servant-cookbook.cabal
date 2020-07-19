@@ -1,0 +1,326 @@
+cabal-version:      >=1.10
+name:               servant-cookbook
+version:            0.1.0.0
+license:            BSD3
+maintainer:         ivan.brennan@gmail.com
+author:             ivanbrennan
+build-type:         Simple
+extra-source-files:
+    CHANGELOG.md
+    README.md
+
+library
+    exposed-modules:
+        Cookbooks.Servant.AnotherBasicAuth
+        Cookbooks.Servant.Authentication
+        Cookbooks.Servant.Streaming
+        Cookbooks.Servant.Client
+        Cookbooks.Servant.ClientFree
+        Cookbooks.Servant.Docs
+        Cookbooks.Servant.Generics
+        Cookbooks.Servant.FileUpload
+        Cookbooks.Servant.HoistedServer
+        Cookbooks.Servant.Https
+        Cookbooks.Servant.Javascript
+        Cookbooks.Servant.JWT
+        Cookbooks.Servant.Curl
+        Cookbooks.Servant.Overview
+        Cookbooks.Servant.Pagination
+        Cookbooks.Servant.PostgreSQLConnectionPool
+        Cookbooks.Servant.Sentry
+        Cookbooks.Servant.Server
+        Cookbooks.Servant.SQLite
+        Cookbooks.Servant.STM
+        Cookbooks.Servant.StructuringApis
+
+    hs-source-dirs:   src
+    default-language: Haskell2010
+    build-depends:
+        aeson >=1.4 && <1.5,
+        base >=4.13 && <4.14,
+        base-compat >=0.11 && <0.12,
+        bytestring >=0.10 && <0.11,
+        containers >=0.6 && <0.7,
+        cookie >=0.4 && <0.5,
+        data-default >=0.7 && <0.8,
+        fast-logger >=3.0 && <3.1,
+        free >=5.1 && <5.2,
+        generic-arbitrary >=0.1 && <0.2,
+        http-api-data >=0.4 && <0.5,
+        http-client >=0.6 && <0.7,
+        http-types >=0.12 && <0.13,
+        lens >=4.18 && <4.19,
+        monad-logger >=0.3 && <0.4,
+        mtl >=2.2 && <2.3,
+        network >=3.1 && <3.2,
+        persistent >=2.10 && <2.11,
+        persistent-postgresql >=2.10 && <2.11,
+        persistent-template >=2.8 && <2.9,
+        postgresql-simple >=0.6 && <0.7,
+        QuickCheck >=2.13 && <2.14,
+        random >=1.1 && <1.2,
+        raven-haskell >=0.1 && <0.2,
+        resource-pool >=0.2 && <0.3,
+        resourcet >=1.2 && <1.3,
+        servant >=0.17 && <0.18,
+        servant-auth >=0.3 && <0.4,
+        servant-auth-server >=0.4 && <0.5,
+        servant-client >=0.17 && <0.18,
+        servant-client-core >=0.17 && <0.18,
+        servant-docs >=0.11 && <0.12,
+        servant-foreign >=0.15 && <0.16,
+        servant-js >=0.9 && <0.10,
+        servant-multipart >=0.11 && <0.12,
+        servant-pagination >=2.3 && <2.4,
+        servant-server >=0.17 && <0.18,
+        sqlite-simple >=0.4 && <0.5,
+        stm >=2.5 && <2.6,
+        text >=1.2 && <1.3,
+        time >=1.9 && <1.10,
+        transformers >=0.5 && <0.6,
+        wai >=3.2 && <3.3,
+        wai-extra >=3.0 && <3.1,
+        warp >=3.3 && <3.4,
+        warp-tls >=3.3 && <3.4
+
+executable servant-client-cookbook
+    main-is:          Client.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-server-cookbook
+    main-is:          Server.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-hoisted-client-cookbook
+    main-is:          HoistedClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-int-server-cookbook
+    main-is:          IntServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-stream-client-cookbook
+    main-is:          StreamClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-stream-server-cookbook
+    main-is:          StreamServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-javascript-server-cookbook
+    main-is:          JavascriptServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-basic-auth-server-cookbook
+    main-is:          BasicAuthServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-gen-auth-server-cookbook
+    main-is:          GenAuthServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable serve-docs
+    main-is:          Docs.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-structuring-apis
+    main-is:          StructuringApis.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-generic-server
+    main-is:          GenericServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-generic-client
+    main-is:          GenericClient.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-https-server
+    main-is:          HttpsServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-overview-server
+    main-is:          OverviewServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-sqlite-app
+    main-is:          SQLiteApp.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-postgresql-connection-pool
+    main-is:          PostgreSQLConnectionPool.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-stm-server
+    main-is:          STMServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-client-free
+    main-is:          ClientFree.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-another-basic-auth
+    main-is:          AnotherBasicAuth.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-basic-streaming
+    main-is:          BasicStreaming.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-jwt-server
+    main-is:          JWTServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-hoisted-server
+    main-is:          HoistedServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-file-upload
+    main-is:          FileUpload.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-paginated-server
+    main-is:          PaginatedServer.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-curl
+    main-is:          Curl.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+executable servant-sentry
+    main-is:          Sentry.hs
+    hs-source-dirs:   app
+    default-language: Haskell2010
+    build-depends:
+        base >=4.13 && <4.14,
+        servant-cookbook -any
+
+test-suite test-suite
+    type: exitcode-stdio-1.0
+    main-is: Spec.hs
+    build-depends:
+        aeson,
+        base,
+        base-compat,
+        hspec,
+        hspec-wai,
+        http-client,
+        http-types,
+        lens,
+        lens-aeson,
+        servant-client,
+        servant-cookbook,
+        servant-server,
+        servant-quickcheck,
+        text,
+        unordered-containers,
+        wai,
+        warp
+    hs-source-dirs:
+        test
+    ghc-options: -Wall -threaded -rtsopts -with-rtsopts=-N
+    default-language: Haskell2010
